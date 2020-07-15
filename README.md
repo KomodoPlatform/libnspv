@@ -103,8 +103,8 @@ The application will try to connect to max 6 peers, send the transaction two two
 
     ./bitcoin-send-tx -d -s 5 -i 192.168.1.110:8333,127.0.0.1:8333 <txhex>
 
-How to Build
-----------------
+How to Build libnspv with libbtc and tools
+------------------------------------------
 
 You will need to have some dev tools prior to building libnspv for your system.
 
@@ -120,10 +120,10 @@ xcode-select --install
 # Update brew and install dependencies
 brew update
 brew upgrade
-brew install libsodium libevent cmake git wget
+brew install libsodium libevent automake libtool git wget
 ```
 
-##### Intall using brew
+##### Install using brew
 
 ```shell
 brew tap jl777/homebrew-libnspv
@@ -154,14 +154,46 @@ cd libnspv
 
 ## Now you can follow the next instructions to compile and update
 
-#### Full library including CLI tool and wallet database
+### First build cryptoconditions library
+
+#### MacOS & Linux
+
+```
+cd ./src/tools/cryptoconditions
+./autogen.sh
+./configure
+make
+```
+
+#### Windows
+
+```
+cd ./src/tools/cryptoconditions
+./build_win.sh
+```
+
+
+### Full libnspv library including CLI tool and wallet database
+
+Go to libnspv directory and run:
+
+On Linux and MacOS:
+
 ```
 ./autogen.sh
 ./configure
 make check
 ```
+On Windows run 
+```
+./build_win.sh
+```
 
-#### Pure library without wallet support
+
+### Pure library without wallet support
+
+Go to libnspv directory and run:
+
 ```
 ./autogen.sh
 ./configure --disable-wallet --disable-tools
@@ -169,6 +201,7 @@ make check
 ```
 
 #### Updating libnspv
+
 ```shell
 cd libnspv
 git pull
@@ -177,9 +210,14 @@ git pull
 make
 ```
 
+Running nspv
+------------
+
 libnspv does all the above, it also can launch a superlite nSPV client
-./nspv KMD launches a KMD superlite
-./nspv BTC launches the normal libbtc headers only SPV mode
+
+`./nspv KMD` launches a KMD superlite
+
+`./nspv BTC` launches the normal libbtc headers only SPV mode
 
 for superlite clients, it will daemonize the nspv executable and it is accessible via JSON requests sent into the localhost
 rpc port. you can specify any available rpc port with -p <port> option at the end.
@@ -187,13 +225,14 @@ rpc port. you can specify any available rpc port with -p <port> option at the en
 there is a coins JSON file that comes from the https://github.com/jl777/coins/coins which will define the default behavior
 of the superlite if it is a komodo "asset" and also has the following fields:
 
+```
 "p2p": 12985,
 "magic":"feb4cb23",
 "nSPV":"5.9.102.210, 5.9.253.195, 5.9.253.196, 5.9.253.197, 5.9.253.198, 5.9.253.199, 5.9.253.200, 5.9.253.201, 5.9.253.202, 5.9.253.203"
+```
 
-the "p2p" field is the coins peer to peer port, the "magic" is the netmagic of that chain. the decimal value of this can be
-obtained from the getinfo call, convert to hex and serialize it into the 4 hexbytes. if you got the direction wrong, just flip
-it around.
+the "p2p" field is the coin's peer to peer port, the "magic" is the netmagic of that chain. the decimal value of this can be
+obtained from the getinfo call, convert to hex and serialize it into the 4 hexbytes. if you got the direction wrong, just flip it around.
 finally, the "nSPV" field is a list of one or more ip addresses of a nSPV fullnode
 
 the JSON api is very simple and almost a direct mapping of the nSPV=1 rpc commands in the komodod, the testvectors
@@ -229,12 +268,13 @@ find . -name 'config.sub' -exec chmod u+w '{}' \; -exec cp -f "${PREFIX}/share/l
 find . -name 'config.guess' -exec chmod u+w '{}' \; -exec cp -f "${PREFIX}/share/libtool/build-aux/config.guess" '{}' \;
 ```
 
-#### Then the usual:
+#### To build libnspv and tools for Android use one time script:
 
-```shell
-./autogen.sh
-./configure
-make
+```
+./androidonetime.sh
 ```
 
+#### Running nspv on Android
+
+Start nspv<br>
 Then visit 127.0.0.1:7771 in your Android browser.
